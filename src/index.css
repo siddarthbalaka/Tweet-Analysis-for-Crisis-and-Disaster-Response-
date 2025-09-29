@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Crisis Response Dashboard Design System */
+
+@layer base {
+  :root {
+    /* Emergency Response Theme */
+    --background: 210 20% 98%;
+    --foreground: 210 40% 8%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 210 40% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 40% 8%;
+
+    /* Professional Blue Primary */
+    --primary: 213 94% 68%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 213 94% 58%;
+
+    /* Emergency Alert Red */
+    --alert: 0 84% 60%;
+    --alert-foreground: 0 0% 100%;
+    --alert-hover: 0 84% 50%;
+
+    /* Warning Orange */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Success Green */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    /* Secondary Gray */
+    --secondary: 210 20% 95%;
+    --secondary-foreground: 210 40% 20%;
+
+    --muted: 210 20% 95%;
+    --muted-foreground: 210 20% 45%;
+
+    --accent: 213 94% 95%;
+    --accent-foreground: 213 94% 20%;
+
+    /* Crisis Severity Levels */
+    --critical: 0 84% 60%;
+    --high: 25 95% 53%;
+    --medium: 45 93% 47%;
+    --low: 142 76% 36%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 20% 88%;
+    --input: 210 20% 95%;
+    --ring: 213 94% 68%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 210 40% 6%;
+    --foreground: 210 20% 98%;
+
+    --card: 210 40% 8%;
+    --card-foreground: 210 20% 98%;
+
+    --popover: 210 40% 8%;
+    --popover-foreground: 210 20% 98%;
+
+    --primary: 213 94% 68%;
+    --primary-foreground: 210 40% 6%;
+    --primary-hover: 213 94% 78%;
+
+    --alert: 0 84% 60%;
+    --alert-foreground: 0 0% 100%;
+    --alert-hover: 0 84% 70%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 12%;
+    --secondary-foreground: 210 20% 85%;
+
+    --muted: 210 40% 12%;
+    --muted-foreground: 210 20% 65%;
+
+    --accent: 213 94% 15%;
+    --accent-foreground: 213 94% 85%;
+
+    --critical: 0 84% 60%;
+    --high: 25 95% 53%;
+    --medium: 45 93% 47%;
+    --low: 142 76% 36%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 210 40% 15%;
+    --input: 210 40% 12%;
+    --ring: 213 94% 68%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
