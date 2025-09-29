@@ -1,5 +1,3 @@
-# Welcome to your Lovable project
-
 
 **Use your preferred IDE**
 
