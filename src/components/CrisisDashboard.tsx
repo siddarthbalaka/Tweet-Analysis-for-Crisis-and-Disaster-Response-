@@ -322,15 +322,6 @@ const CrisisDashboard = () => {
           <CardContent>
             <div className="rounded-md overflow-hidden border border-red-100">
               <CrisisMap
-                incidents={filteredPosts.map((post) => ({
-                  id: post.id,
-                  type: post.disasterType,
-                  severity: post.severity,
-                  coordinates: post.coordinates,
-                  location: post.location,
-                  description: post.content,
-                  timestamp: post.timestamp,
-                }))}
               />
             </div>
           </CardContent>
@@ -427,7 +418,18 @@ const CrisisDashboard = () => {
             </CardContent>
           </Card>
         </div>
-
+        {/* MAP */}
+        <Card className="lg:col-span-2 bg-white border border-red-200 shadow-sm rounded-xl">
+  <CardHeader className="pb-2">
+    <CardTitle className="text-red-800">Heatmap</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="rounded-md overflow-hidden border border-red-100">
+      <CrisisMap
+      />
+    </div>
+  </CardContent>
+</Card>
         {/* RIGHT SIDEBAR */}
         <div className="space-y-6">
           <Card className="bg-white border border-red-200 shadow-sm rounded-xl">
