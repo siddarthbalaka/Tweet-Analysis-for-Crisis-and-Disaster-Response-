@@ -1,0 +1,23 @@
+{
+    "incidents": [
+      {
+        "id": 1,
+        "type": "Flood",
+        "severity": "critical",
+        "location": "Dallas, TX",
+        "coordinates": [32.7767, -96.7970],
+        "description": "Major flooding in downtown area",
+        "timestamp": "2025-10-01T15:30:00Z"
+      },
+      {
+        "id": 2,
+        "type": "Fire",
+        "severity": "high",
+        "location": "Houston, TX",
+        "coordinates": [29.7604, -95.3698],
+        "description": "Warehouse fire spreading quickly",
+        "timestamp": "2025-10-01T15:45:00Z"
+      }
+    ]
+  }
+  
