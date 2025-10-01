@@ -8,6 +8,10 @@ import { borderClassFor } from "@/lib/severity";
 import { CopyLinkButton } from "@/components/ui/copy-link-button";
 import { cn } from "@/lib/utils";
 import CrisisMap from "@/components/CrisisMap";
+import { User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+
 import {
   AlertTriangle,
   MapPin,
@@ -16,6 +20,9 @@ import {
   TrendingUp,
   Zap,
 } from "lucide-react";
+interface CrisisDashboardProps {
+  username?: string; // optional prop
+}
 
 interface CrisisPost {
   id: string;
@@ -34,7 +41,10 @@ interface DisasterStats {
   trend: number;
 }
 
-const CrisisDashboard = () => {
+  const CrisisDashboard = ({ username }: CrisisDashboardProps) => {
+    const navigate = useNavigate();  // ✅ move inside component
+    const isLoggedIn = Boolean(username && username.trim());
+  
   // Convert each post to a 0..1 score we can color by
   const getScore = (p: any) => {
     if (typeof p.score === "number") return p.score;
@@ -62,10 +72,14 @@ const CrisisDashboard = () => {
     setAcknowledged((prev) => ({ ...prev, [id]: { time, responder } }));
   };
 
+
   // New controls (demo-friendly)
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [timeWindow, setTimeWindow] = useState<number>(60);
   const [minConfidence, setMinConfidence] = useState<number>(50);
+  
+  
+  console.log("Rendering Dashboard, username:", username);
 
   // Mock data
   useEffect(() => {
@@ -211,15 +225,28 @@ const CrisisDashboard = () => {
             <p className="text-red-100 mt-2 text-lg">
               Real-time social media monitoring for emergency response
             </p>
-          </div>
-          <Button
-            variant="secondary"
-            className="bg-white/20 text-white hover:bg-white/30"
-          >
-            <Bell className="h-4 w-4 mr-2" />
-            Alerts (3)
-          </Button>
+          
         </div>
+        <div className="flex items-center gap-3"></div>
+          {/* Alerts button */}
+  <Button
+    variant="secondary"
+    className="bg-white/20 text-white hover:bg-white/30"
+  >
+    <Bell className="h-4 w-4 mr-2" />
+    Alerts (3)
+  </Button>
+
+  {/* Login/Switch User button */}
+  <Button
+    variant="secondary"
+    className="bg-white/20 text-white hover:bg-white/30"
+    onClick={() => navigate("/login")}
+  >
+    <User className="h-4 w-4 mr-2" />
+    Login
+  </Button>
+</div>
       </div>
 
       {/* KPI CARDS */}
@@ -419,17 +446,7 @@ const CrisisDashboard = () => {
           </Card>
         </div>
         {/* MAP */}
-        <Card className="lg:col-span-2 bg-white border border-red-200 shadow-sm rounded-xl">
-  <CardHeader className="pb-2">
-    <CardTitle className="text-red-800">Heatmap</CardTitle>
-  </CardHeader>
-  <CardContent>
-    <div className="rounded-md overflow-hidden border border-red-100">
-      <CrisisMap
-      />
-    </div>
-  </CardContent>
-</Card>
+        
         {/* RIGHT SIDEBAR */}
         <div className="space-y-6">
           <Card className="bg-white border border-red-200 shadow-sm rounded-xl">
