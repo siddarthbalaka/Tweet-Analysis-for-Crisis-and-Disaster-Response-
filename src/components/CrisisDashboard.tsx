@@ -1,17 +1,17 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SeverityBadge } from "@/components/ui/severity-badge";
+import { borderClassFor } from "@/lib/severity";
+import { CopyLinkButton } from "@/components/ui/copy-link-button";
+import { cn } from "@/lib/utils";
 import CrisisMap from "@/components/CrisisMap";
 import {
   AlertTriangle,
   MapPin,
-  Clock,
   Activity,
-  Search,
-  Filter,
   Bell,
   TrendingUp,
   Zap,
@@ -35,6 +35,17 @@ interface DisasterStats {
 }
 
 const CrisisDashboard = () => {
+  // Convert each post to a 0..1 score we can color by
+  const getScore = (p: any) => {
+    if (typeof p.score === "number") return p.score;
+    if (typeof p.modelScore === "number") return p.modelScore;
+    if (typeof p.confidence === "number") return p.confidence;
+    const sev = String(p.severity ?? "").toLowerCase();
+    if (sev === "critical" || sev === "high") return 0.95; // urgent
+    if (sev === "medium") return 0.65;                     // medium
+    return 0.25;                                           // low
+  };
+
   const [posts, setPosts] = useState<CrisisPost[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,29 +54,18 @@ const CrisisDashboard = () => {
   const [acknowledged, setAcknowledged] = useState<{
     [key: string]: { time: string; responder: string };
   }>({});
-  
+
   const handleAcknowledge = (id: string) => {
-  const responder = prompt("Enter your name:"); // simple popup input
-  if (!responder) return; // if cancelled or empty, do nothing
-
-  const time = new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  setAcknowledged((prev) => ({
-    ...prev,
-    [id]: { time, responder },
-  }));
-};
-
-
-
+    const responder = prompt("Enter your name:");
+    if (!responder) return;
+    const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    setAcknowledged((prev) => ({ ...prev, [id]: { time, responder } }));
+  };
 
   // New controls (demo-friendly)
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [timeWindow, setTimeWindow] = useState<number>(60); // minutes (UI only for now)
-  const [minConfidence, setMinConfidence] = useState<number>(50); // UI only for now
+  const [timeWindow, setTimeWindow] = useState<number>(60);
+  const [minConfidence, setMinConfidence] = useState<number>(50);
 
   // Mock data
   useEffect(() => {
@@ -139,22 +139,6 @@ const CrisisDashboard = () => {
     setStats(mockStats);
   }, []);
 
-  // Severity → red palette
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case "critical":
-        return "bg-red-800 text-white";
-      case "high":
-        return "bg-red-600 text-white";
-      case "medium":
-        return "bg-red-400 text-white";
-      case "low":
-        return "bg-red-200 text-red-900";
-      default:
-        return "bg-red-100 text-red-900";
-    }
-  };
-
   // Confidence proxy (demo): map severity → confidence %
   const severityConfidence: Record<CrisisPost["severity"], number> = {
     critical: 90,
@@ -185,11 +169,10 @@ const CrisisDashboard = () => {
     filteredPosts.forEach((p) => {
       byType[p.disasterType] = (byType[p.disasterType] || 0) + 1;
     });
-    const entries = Object.entries(byType)
+    return Object.entries(byType)
       .map(([type, count]) => ({ type, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 3);
-    return entries;
   }, [filteredPosts]);
 
   // At-a-glance
@@ -204,19 +187,17 @@ const CrisisDashboard = () => {
           );
     return { posts: filteredPosts.length, types, avgConfidence: avg };
   }, [filteredPosts]);
-  
 
   const helpRequests = filteredPosts.filter(
     (post) => post.severity === "critical" || post.severity === "high"
   );
-  
-  //Filter Urgent Posts
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* HERO HEADER (image only, red overlay) */}
+      {/* HERO HEADER */}
       <div className="relative h-72 w-full mb-10 overflow-hidden">
         <img
-          src="/header-bg.jpg" // put your image in /public/header-bg.jpg
+          src="/header-bg.jpg"
           alt="Crisis background"
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -240,7 +221,6 @@ const CrisisDashboard = () => {
           </Button>
         </div>
       </div>
-          
 
       {/* KPI CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 px-6">
@@ -248,9 +228,7 @@ const CrisisDashboard = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-red-600">
-                  Active Incidents
-                </p>
+                <p className="text-sm font-medium text-red-600">Active Incidents</p>
                 <p className="text-3xl font-bold text-red-800">23</p>
               </div>
               <Activity className="h-9 w-9 text-red-600" />
@@ -263,9 +241,7 @@ const CrisisDashboard = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-red-600">
-                  Critical Alerts
-                </p>
+                <p className="text-sm font-medium text-red-600">Critical Alerts</p>
                 <p className="text-3xl font-bold text-red-700">5</p>
               </div>
               <AlertTriangle className="h-9 w-9 text-red-700" />
@@ -278,9 +254,7 @@ const CrisisDashboard = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-red-600">
-                  Posts Analyzed
-                </p>
+                <p className="text-sm font-medium text-red-600">Posts Analyzed</p>
                 <p className="text-3xl font-bold text-red-800">1,247</p>
               </div>
               <TrendingUp className="h-9 w-9 text-red-600" />
@@ -292,8 +266,6 @@ const CrisisDashboard = () => {
 
       {/* CONTROLS + MAP + TRENDING ROW */}
       <div className="px-6 grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-        {/* Controls span all columns on mobile, left columns on desktop */}
-        
         {/* Trending / At-a-glance */}
         <div className="space-y-6">
           <Card className="bg-white border border-red-200 shadow-sm rounded-xl">
@@ -368,92 +340,92 @@ const CrisisDashboard = () => {
       {/* FEED + RIGHT SIDEBAR */}
       <div className="px-6 grid grid-cols-1 lg:grid-cols-3 gap-6 pb-12">
         {/* FEED */}
-        {/* FEED */}
-<div className="lg:col-span-2">
-  <Card className="bg-white border border-red-200 shadow-sm rounded-xl">
-    <CardHeader>
-      <CardTitle className="text-red-800">
-        {activeTab === "feed" ? "Live Crisis Feed" : "Urgent Help Requests"}
-      </CardTitle>
-      <div className="flex gap-2 mt-3">
-        <Button
-          onClick={() => setActiveTab("feed")}
-          className={`px-4 py-2 rounded-lg ${
-            activeTab === "feed"
-              ? "bg-red-600 text-white"
-              : "border border-red-300 text-red-700 hover:bg-red-50"
-          }`}
-        >
-          Live Feed
-        </Button>
-        <Button
-          onClick={() => setActiveTab("help")}
-          className={`px-4 py-2 rounded-lg ${
-            activeTab === "help"
-              ? "bg-red-600 text-white"
-              : "border border-red-300 text-red-700 hover:bg-red-50"
-          }`}
-        >
-          Help Requests
-        </Button>
-      </div>
-    </CardHeader>
-    <CardContent>
-      <ScrollArea className="h-[600px] pr-4">
-        <div className="space-y-4">
-          {(activeTab === "feed" ? filteredPosts : helpRequests).map((post) => (
-            <div
-            key={post.id}
-            className={`border rounded-lg p-4 shadow-sm ${
-              activeTab === "help"
-                ? "border-red-500 bg-red-50"
-                : "border-red-200 bg-white"
-            }`}
-          >
-          
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <Badge className={getSeverityColor(post.severity)}>
-                    {post.severity.toUpperCase()}
-                  </Badge>
-                  <p className="text-sm text-red-500 mt-1">
-                    {post.author} • {post.timestamp}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1 text-red-500">
-                  <MapPin className="h-4 w-4" />
-                  <span className="text-sm">{post.location}</span>
-                </div>
+        <div className="lg:col-span-2">
+          <Card className="bg-white border border-red-200 shadow-sm rounded-xl">
+            <CardHeader>
+              <CardTitle className="text-red-800">
+                {activeTab === "feed" ? "Live Crisis Feed" : "Urgent Help Requests"}
+              </CardTitle>
+              <div className="flex gap-2 mt-3">
+                <Button
+                  onClick={() => setActiveTab("feed")}
+                  className={`px-4 py-2 rounded-lg ${
+                    activeTab === "feed"
+                      ? "bg-red-600 text-white"
+                      : "border border-red-300 text-red-700 hover:bg-red-50"
+                  }`}
+                >
+                  Live Feed
+                </Button>
+                <Button
+                  onClick={() => setActiveTab("help")}
+                  className={`px-4 py-2 rounded-lg ${
+                    activeTab === "help"
+                      ? "bg-red-600 text-white"
+                      : "border border-red-300 text-red-700 hover:bg-red-50"
+                  }`}
+                >
+                  Help Requests
+                </Button>
               </div>
-              <p className="text-red-900 leading-relaxed">{post.content}</p>
-              {activeTab === "help" && (
-  <>
-    {acknowledged[post.id] ? (
-      <p className="mt-3 text-green-600 font-medium">
-        ✅ Acknowledged by {acknowledged[post.id].responder} at {acknowledged[post.id].time}
-      </p>
-    ) : (
-      <Button
-        className="mt-3 bg-red-600 text-white hover:bg-red-700"
-        onClick={() => handleAcknowledge(post.id)}
-      >
-        Respond
-      </Button>
-    )}
-  </>
-)}
-</div>
-))} 
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[600px] pr-4">
+                <div className="space-y-4">
+                  {(activeTab === "feed" ? filteredPosts : helpRequests).map((post) => (
+                    <div
+                      key={post.id}
+                      className={cn(
+                        "border rounded-lg p-4 shadow-sm",
+                        activeTab === "help" ? "bg-red-50" : "bg-white",
+                        borderClassFor(getScore(post)) // colored left border
+                      )}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <SeverityBadge score={getScore(post)} />
+                          <p className="text-sm text-red-500 mt-1">
+                            {post.author} • {post.timestamp}
+                          </p>
+                        </div>
 
-          {activeTab === "help" && helpRequests.length === 0 && (
-            <p className="text-sm text-red-500">No urgent help requests.</p>
-          )}
-        </div>
-      </ScrollArea>
-    </CardContent>
-  </Card>
-</div>
+                        <div className="flex items-center gap-2">
+                          {post.id && <CopyLinkButton id={String(post.id)} />}
+                          <div className="flex items-center gap-1 text-red-500">
+                            <MapPin className="h-4 w-4" />
+                            <span className="text-sm">{post.location}</span>
+                          </div>
+                        </div>
+                      </div>
 
+                      <p className="text-red-900 leading-relaxed">{post.content}</p>
+
+                      {activeTab === "help" && (
+                        <>
+                          {acknowledged[post.id] ? (
+                            <p className="mt-3 text-green-600 font-medium">
+                              ✅ Acknowledged by {acknowledged[post.id].responder} at {acknowledged[post.id].time}
+                            </p>
+                          ) : (
+                            <Button
+                              className="mt-3 bg-red-600 text-white hover:bg-red-700"
+                              onClick={() => handleAcknowledge(post.id)}
+                            >
+                              Respond
+                            </Button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ))}
+
+                  {activeTab === "help" && helpRequests.length === 0 && (
+                    <p className="text-sm text-red-500">No urgent help requests.</p>
+                  )}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
         </div>
 
         {/* RIGHT SIDEBAR */}
@@ -465,10 +437,7 @@ const CrisisDashboard = () => {
             <CardContent>
               <div className="space-y-4">
                 {stats.map((stat) => (
-                  <div
-                    key={stat.type}
-                    className="flex items-center justify-between"
-                  >
+                  <div key={stat.type} className="flex items-center justify-between">
                     <p className="font-medium text-red-700">{stat.type}</p>
                     <div
                       className={`flex items-center gap-1 text-sm ${
@@ -507,9 +476,9 @@ const CrisisDashboard = () => {
           </Card>
         </div>
       </div>
-
-    
+    </div>
   );
 };
 
 export default CrisisDashboard;
+
